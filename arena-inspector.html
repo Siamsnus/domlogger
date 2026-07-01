@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Arena DOM Inspector</title>
+<style>
+  * { margin: 0; box-sizing: border-box; }
+  body { background: #0a0a0a; color: #ccc; font: 15px/1.6 'SF Mono', 'Fira Code', monospace; padding: 40px; max-width: 700px; margin: 0 auto; }
+  h1 { color: #0f0; font-size: 20px; margin-bottom: 8px; }
+  h1 span { color: #666; font-weight: normal; }
+  .sub { color: #888; margin-bottom: 32px; }
+  .bookmarklet-link { display: inline-block; background: #1a1a1a; border: 2px solid #0f0; color: #0f0; padding: 12px 24px; border-radius: 6px; text-decoration: none; font: bold 14px monospace; margin: 20px 0; cursor: grab; box-shadow: 0 0 20px rgba(0,255,0,0.15); transition: all 0.2s; }
+  .bookmarklet-link:hover { background: #0f0; color: #000; box-shadow: 0 0 30px rgba(0,255,0,0.4); }
+  .steps { margin: 24px 0; }
+  .steps li { margin: 12px 0; color: #aaa; }
+  .steps li strong { color: #0f0; }
+  .panel-preview { background: #111; border: 1px solid #0f0; border-radius: 8px; padding: 12px 16px; margin: 20px 0; display: inline-block; }
+  .panel-preview .title { color: #0f0; font-weight: bold; font-size: 11px; margin-bottom: 6px; }
+  .panel-preview button { font: 10px monospace; background: #222; color: #0f0; border: 1px solid #0f0; border-radius: 4px; padding: 3px 8px; margin: 0 2px; cursor: default; }
+  .panel-preview .status { color: #ff0; font-size: 10px; margin-top: 6px; }
+  code { background: #1a1a1a; color: #0f0; padding: 2px 6px; border-radius: 3px; font-size: 13px; }
+  .note { color: #666; font-size: 13px; margin-top: 32px; border-top: 1px solid #222; padding-top: 16px; }
+</style>
+</head>
+<body>
+
+<h1>⚔ Arena DOM Inspector <span>v1.0</span></h1>
+<p class="sub">One-click DOM mapping for AI Sparring Arena. Drag to bookmarks bar.</p>
+
+<a class="bookmarklet-link" href="javascript:void(function(){if(window._AI){window._AI.panel.style.display=window._AI.panel.style.display==='none'?'block':'none';return}var R=[],M=[],ob=null,t0=0;function l(s,m){var x='['+s+'] '+m;R.push(x);console.log(x)}function snap(){R.length=0;l('META','URL: '+location.href);l('META','Time: '+new Date().toISOString());document.querySelectorAll('textarea').forEach(function(e,i){l('INPUT','textarea['+i+'] placeholder=%22'+e.placeholder+'%22 name=%22'+e.name+'%22 id=%22'+e.id+'%22 class=%22'+e.className.substring(0,60)+'%22')});document.querySelectorAll('[contenteditable=true]').forEach(function(e,i){l('INPUT','editable['+i+'] tag='+e.tagName+' id=%22'+e.id+'%22 class=%22'+e.className.substring(0,60)+'%22')});var btns=[].slice.call(document.querySelectorAll('button,div[role=button]')).filter(function(e){return e.getBoundingClientRect().bottom>window.innerHeight-300%26%26e.getBoundingClientRect().height>0});btns.forEach(function(e,i){l('BTN',e.tagName+' class=%22'+e.className.substring(0,50)+'%22 aria=%22'+(e.getAttribute('aria-label')||'')+'%22 text=%22'+(e.textContent||'').trim().substring(0,25)+'%22')});var sels=['.ds-assistant-message-main-content','[data-message-author-role=assistant]','[data-role=assistant]','.ds-message','[class*=message]'];sels.forEach(function(s){try{var n=document.querySelectorAll(s).length;if(n)l('MSG','%22'+s+'%22 = '+n+' elements')}catch(e){}});var asst=document.querySelectorAll('.ds-assistant-message-main-content,[data-message-author-role=assistant]');[].slice.call(asst).forEach(function(e,i){l('ASST','['+i+'] '+e.innerText.length+'ch %22'+e.innerText.substring(0,50)+'...%22 tag='+e.tagName+' class=%22'+e.className.substring(0,50)+'%22')});var last=document.querySelector('.ds-message:last-child,[data-message-author-role=assistant]:last-child');if(last)l('HTML',last.innerHTML.substring(0,600));st.textContent='Snap: '+R.length+' lines'}function startOb(){if(ob)ob.disconnect();M.length=0;t0=Date.now();var tgt=document.querySelector('main')||document.body;ob=new MutationObserver(function(list){list.forEach(function(mut){var dt=Date.now()-t0;if(mut.type==='childList'){mut.addedNodes.forEach(function(n){if(n.nodeType!==1)return;var c=n.className||'';if(c.toString().match(/cursor|blink|loading|typing|streaming|thinking|generat|pulse|spinner/i)){M.push('+'+dt+'ms ADD: '+n.tagName+'.'+c.toString().substring(0,60))}if(n.closest%26%26n.closest('.ds-assistant-message-main-content,[data-message-author-role=assistant]')){M.push('+'+dt+'ms MSG: '+n.tagName+'.'+c.toString().substring(0,40))}});mut.removedNodes.forEach(function(n){if(n.nodeType!==1)return;var c=n.className||'';if(c.toString().match(/cursor|blink|loading|typing|streaming|thinking|generat|pulse|spinner/i)){M.push('+'+dt+'ms DEL: '+n.tagName+'.'+c.toString().substring(0,60))}})}if(mut.type==='attributes'%26%26mut.attributeName==='class'){var el=mut.target;if((el.getAttribute('role')==='button'||el.tagName==='BUTTON')%26%26el.getBoundingClientRect().bottom>window.innerHeight-200){M.push('+'+dt+'ms BTN: '+el.tagName+'.'+el.className.substring(0,60))}}})});ob.observe(tgt,{childList:true,subtree:true,attributes:true,attributeFilter:['class','aria-label','disabled']});st.textContent='Watching...';stInt=setInterval(function(){st.textContent='Watching... ('+M.length+' events)'},1000)}function stopOb(){if(ob){ob.disconnect();ob=null}if(stInt)clearInterval(stInt);M.forEach(function(m){l('MUT',m)});if(M.length===0)l('MUT','No streaming indicators found');st.textContent='Stopped. '+R.length+' lines'}function copyR(){var txt=R.join('\n');navigator.clipboard.writeText(txt).then(function(){st.textContent='Copied!'}).catch(function(){prompt('Copy:',txt.substring(0,2000))})}var stInt=null;var p=document.createElement('div');p.innerHTML='<div style=%22font:bold 11px monospace;color:%230f0;margin:0 0 6px%22>⚔ Arena Inspector</div><div style=%22display:flex;gap:4px;flex-wrap:wrap%22><button id=%22ai-snap%22>📸 Snap</button><button id=%22ai-watch%22>👁 Watch</button><button id=%22ai-stop%22>⏹ Stop</button><button id=%22ai-copy%22>📋 Copy</button><button id=%22ai-close%22>✕</button></div><div id=%22ai-status%22 style=%22font:10px monospace;color:%23ff0;margin-top:4px%22>Ready</div>';p.style.cssText='position:fixed;bottom:10px;right:10px;z-index:999999;background:%23111;border:1px solid %230f0;border-radius:8px;padding:8px 12px;box-shadow:0 0 20px rgba(0,255,0,0.3)';var bs='font:10px monospace;background:%23222;color:%230f0;border:1px solid %230f0;border-radius:4px;padding:3px 8px;cursor:pointer';document.body.appendChild(p);p.querySelectorAll('button').forEach(function(b){b.style.cssText=bs});var st=p.querySelector('%23ai-status');p.querySelector('%23ai-snap').onclick=snap;p.querySelector('%23ai-watch').onclick=startOb;p.querySelector('%23ai-stop').onclick=stopOb;p.querySelector('%23ai-copy').onclick=copyR;p.querySelector('%23ai-close').onclick=function(){p.style.display='none'};window._AI={panel:p,snap:snap,watch:startOb,stop:stopOb,copy:copyR,report:R,mutations:M};snap();startOb()}())">⚔ Arena Inspector</a>
+
+<p style="color:#888; font-size:12px; margin-bottom:24px;">↑ Drag this to your bookmarks bar</p>
+
+<ol class="steps">
+  <li><strong>Drag</strong> the green button above to your bookmarks bar</li>
+  <li>Navigate to any chat site (DeepSeek, ChatGPT, Gemini, etc.)</li>
+  <li><strong>Click</strong> the bookmarklet — a floating panel appears:</li>
+</ol>
+
+<div class="panel-preview">
+  <div class="title">⚔ Arena Inspector</div>
+  <button>📸 Snap</button>
+  <button>👁 Watch</button>
+  <button>⏹ Stop</button>
+  <button>📋 Copy</button>
+  <button>✕</button>
+  <div class="status">Watching... (14 events)</div>
+</div>
+
+<ol class="steps" start="4">
+  <li><strong>📸 Snap</strong> — captures all inputs, buttons, messages, selectors instantly</li>
+  <li><strong>👁 Watch</strong> — starts MutationObserver (auto-starts on first click)</li>
+  <li>Send a message to the AI and <strong>wait for it to finish</strong></li>
+  <li><strong>⏹ Stop</strong> — stops observer, captures animation data</li>
+  <li><strong>📋 Copy</strong> — copies full report to clipboard. Paste to Claude.</li>
+</ol>
+
+<p class="note">Click the bookmarklet again to toggle the panel. Works on any site. The observer catches streaming cursors, loading indicators, button state changes — everything needed to map a new Arena opponent's DOM in one shot.</p>
+
+</body>
+</html>
